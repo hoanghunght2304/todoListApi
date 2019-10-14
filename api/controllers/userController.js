@@ -53,23 +53,29 @@ exports.delete_a_user = (req, res) => {
   }, (err, user) => {
     if (err)
       res.send(err);
-    res.json({ message: 'User successfully deleted'});
+    res.json({ message: 'User successfully deleted' });
   });
 };
 
 exports.register = (req, res) => {
-  let {username, password, name} = req.body;
-  if(!username || !password || !name) {
-    return res.json({message: 'Tham so ko hop le'});
-  }
+   let {username, password, name} = req.body;
+  // if(!username || !password || !name) {
+  //   return res.json({message: 'Tham so ko hop le'});
+  // }
 
-  let newUser = new User(req.body);
+  //let newUser = new User(req.body);
   // newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
-  bcrypt.hash(req.body.password, 10, async (err, hash) => {
+  bcrypt.hash(req.body.password, 10, (err, hash) => {
     if (err) {
-      return res.status(400).send({message: err});
+      return res.status(400).send({ message: err });
     } else {
-      await newUser.save((err, user) => {
+      let newUser = new User({
+        username,
+        password,
+        name,
+        hash_password: hash
+      });
+      newUser.save((err, user) => {
         if (err) {
           return res.status(400).send({
             message: err
@@ -81,55 +87,8 @@ exports.register = (req, res) => {
       });
     }
   });
-  // newUser.save((err, user) => {
-  //   if (err) {
-  //     return res.status(400).send({
-  //       message: err
-  //     });
-  //   } else {
-  //     user.hash_password = undefined;
-  //     return res.json(user);
-  //   }
-  // });
 };
 
-
-// exports.register = (req, res, next) => {
-//   User.find({ username: req.body.username })
-//     .exec()
-//     .then(user => {
-//       if (user.length >= 1) {
-//         return res.status(409).json({
-//           message: "Mail exists"
-//         });
-//       } else {
-//         bcrypt.hash(req.body.password, 10, (err, hash) => {
-//           if (err) {
-//             return res.status(500).json({
-//               error: err
-//             });
-//           } else {
-//             const user = new User({
-//               username: req.body.username,
-//               password: req.body.password,
-//               name: req.body.name
-//             });
-//             user
-//               .save()
-//               .then(result => {
-//                 res.status(201).json(user);
-//               })
-//               .catch(err => {
-//                 console.log(err);
-//                 res.status(500).json({
-//                   error: err
-//                 });
-//               });
-//           }
-//         });
-//       }
-//     });
-// };
 
 exports.login = (req, res) => {
 
@@ -143,7 +102,7 @@ exports.login = (req, res) => {
       if (user.password !== req.body.password) {
         res.status(401).json({ message: 'Authentication failed. Wrong password.' });
       } else {
-        return res.json({ token: jwt.sign({ username: user.username, name: user.name, _id: user._id }, 'HoangHung', {expiresIn: "1h"}) });
+        return res.json({ token: jwt.sign({ username: user.username, name: user.name, _id: user._id }, 'HoangHung', { expiresIn: "1h" }) });
       }
     }
   });

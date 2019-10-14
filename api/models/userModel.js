@@ -7,16 +7,21 @@ const mongoose = require('mongoose'),
 
 
 let UserSchema = new Schema({
-  name: String,
+  name: {
+    type: String,
+    required: true
+  },
   username: {
     type: String,
     required: true,
     unique: true
   },
-  password: String,
-  hash_password: {
+  password: {
     type: String,
-    //required: true
+    required: true
+  },
+  hash_password: {
+    type: String
   },
   created: {
     type: Date,
